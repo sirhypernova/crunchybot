@@ -1,0 +1,10 @@
+{
+  "token": "",
+  "prefix": "!",
+  "owners": ["DISCORD_ID"],
+  "outputFolder": "/path/to/output",
+  "login": {
+    "username": "",
+    "password": ""
+  }
+}
