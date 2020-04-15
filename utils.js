@@ -30,10 +30,11 @@ module.exports = {
       crunchyBase + "ajax/?req=RpcApiSearch_GetSearchCandidates"
     )
       .then((res) => res.text())
-      .then((text) =>
-        JSON.parse(text.replace("/*-secure-\n", "").replace("\n*/", ""))
-      );
-    if (data.result_code == 1) {
+      .then((text) => {
+        return JSON.parse(text.replace("/*-secure-\n", "").replace("\n*/", ""));
+      })
+      .catch((e) => false);
+    if (data && data.result_code == 1) {
       return data.data
         .filter((d) => d.type == "Series")
         .map((d) => ({ name: d.name, link: d.link.replace("/", "") }));

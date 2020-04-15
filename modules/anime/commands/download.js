@@ -74,7 +74,7 @@ module.exports = {
       if (show == false) return msg.channel.send("Timed out");
       await selectShow.delete();
     } else {
-      show = d.link;
+      show = searchedShows[0].link;
     }
 
     const showData = await Utils.fetchData(show);

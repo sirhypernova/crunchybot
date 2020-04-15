@@ -6,5 +6,12 @@
   "login": {
     "username": "",
     "password": ""
+  },
+  "plex": {
+    "hostname": "",
+    "port": 32400,
+    "token": "",
+    "libraryIndex": 1,
+    "enabled": false
   }
 }
