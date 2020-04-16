@@ -228,6 +228,12 @@ module.exports = {
           "Something went wrong when creating an unblocked session. Please try again without the 'unblocked' argument.";
         cancelled = true;
       }
+      if (text.includes("UnhandledPromiseRejectionWarning:")) {
+        error = text
+          .split("\r")[0]
+          .split("UnhandledPromiseRejectionWarning: ")[1];
+        cancelled = true;
+      }
     });
 
     downloader.on("exit", (code) => {

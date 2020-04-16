@@ -19,13 +19,7 @@ Easily download Anime from Crunchyroll to your private server via a discord bot
 
 `cd crunchybot && npm install`
 
-Rename `config.tmp.json`. Put your discord ID and whoever else you want to allow command usage in `owners` section.
-
-Put your Crunchyroll login in the `login` section.
-
-Put the path for where to download Anime to in the `outputFolder` section.
-
-Fill in your discord bot token.
+Follow the setup prompt. If you need to run it again, simply run `node setup.js`
 
 ### Running
 
