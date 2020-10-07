@@ -16,6 +16,10 @@
     "node-fetch": "^2.6.0",
     "node-pty": "^0.9.0",
     "plex-api": "^5.3.1",
+    "puppeteer": "^3.1.0",
+    "puppeteer-core": "^3.1.0",
+    "puppeteer-extra": "^3.1.9",
+    "puppeteer-extra-plugin-stealth": "^2.4.9",
     "readline-sync": "^1.4.10",
     "strip-ansi": "^6.0.0"
   }

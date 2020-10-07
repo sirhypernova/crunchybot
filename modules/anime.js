@@ -10,6 +10,7 @@ module.exports = {
       this.searchData = await Utils.fetchSearch();
       module.scanCommands(path.resolve(__dirname, "anime/commands"));
       console.log("[%s] Module Loaded", module._name);
+      module.dj.user.setActivity("Anime", { type: "WATCHING" });
     },
   },
 };

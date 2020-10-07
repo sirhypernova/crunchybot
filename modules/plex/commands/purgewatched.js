@@ -34,11 +34,9 @@ module.exports = {
         watchedGB +
           "gb of watched anime will be deleted. This may take a few seconds.."
       );
-      files.forEach((file) => {
-        fs.unlink(file.file, (err) => {
-          if (err) console.log(err);
-        });
-      });
+      for (let file of files) {
+        fs.unlinkSync(file.file);
+      }
       const seasonFolders = [];
       const removedSeasons = [];
       files.forEach((file) => {
@@ -56,7 +54,8 @@ module.exports = {
       removedSeasons.forEach((season) => {
         const show = path.resolve(season, "..");
         if (!showFolders.includes(show)) {
-          let hasFiles = !!fs.readdirSync(show);
+          showFolders.push(show);
+          let hasFiles = !!fs.readdirSync(show).length;
           if (!hasFiles) {
             fs.rmdirSync(show);
           }

@@ -29,13 +29,15 @@ module.exports = {
       return msg.channel.send(
         "Search data is not loaded. Please use the refresh command."
       );
+
     let searchedShows = this.module.searchData
       .filter(
         (d) =>
-          d.name.toLowerCase().includes(args.join(" ")) ||
-          d.link.toLowerCase().includes(show)
+          d.name.toLowerCase().includes(args.join(" ").toLowerCase()) ||
+          d.link.toLowerCase().includes(show.toLowerCase())
       )
       .slice(0, 4);
+
     if (!searchedShows.length) return msg.channel.send("Show does not exist");
     if (searchedShows.length > 1) {
       let selectShow = await msg.channel.send(
@@ -79,45 +81,48 @@ module.exports = {
 
     const showData = await Utils.fetchData(show);
     if (showData == false) return msg.channel.send("Show does not exist");
-    const showName = showData.title;
+    const showName = showData.title.replace(/\//g, "\\");
 
-    let progressMessage = await msg.channel.send(
-      new RichEmbed()
-        .setTitle("Choose Season")
-        .setDescription(
-          showData.seasons
-            .map((name, index) => `**${index + 1}.** ${name}`)
-            .join("\n")
-        )
-        .setFooter("Please send the season number to download from.")
-        .setColor("#f47521")
-    );
+    let season = 1;
+    let progressMessage = false;
+    if (showData.seasons.length > 1) {
+      progressMessage = await msg.channel.send(
+        new RichEmbed()
+          .setTitle("Choose Season")
+          .setDescription(
+            showData.seasons
+              .map((name, index) => `**${index + 1}.** ${name}`)
+              .join("\n")
+          )
+          .setFooter("Please send the season number to download from.")
+          .setColor("#f47521")
+      );
 
-    const seasonCollector = msg.channel.createMessageCollector(
-      (m) => {
-        return (
-          m.author.id == msg.author.id && /^[1-9]{1}[0-9]*$/.test(m.content)
-        );
-      },
-      { time: 15000, maxMatches: 1 }
-    );
+      const seasonCollector = msg.channel.createMessageCollector(
+        (m) => {
+          return (
+            m.author.id == msg.author.id && /^[1-9]{1}[0-9]*$/.test(m.content)
+          );
+        },
+        { time: 15000, maxMatches: 1 }
+      );
 
-    const season = await new Promise((res) => {
-      seasonCollector.on("end", (seasons) => {
-        if (seasons.size) {
-          let thisSeason = parseInt(seasons.first().content);
-          if (thisSeason > showData.seasons.length) return res("invalid");
-          seasons.first().delete();
-          res(thisSeason);
-        }
-        res(false);
+      season = await new Promise((res) => {
+        seasonCollector.on("end", (seasons) => {
+          if (seasons.size) {
+            let thisSeason = parseInt(seasons.first().content);
+            if (thisSeason > showData.seasons.length) return res("invalid");
+            seasons.first().delete();
+            res(thisSeason);
+          }
+          res(false);
+        });
       });
-    });
 
-    if (season == "invalid")
-      return msg.channel.send("The season you provided is invalid.");
-    if (season == false) return msg.channel.send("Timed out");
-
+      if (season == "invalid")
+        return msg.channel.send("The season you provided is invalid.");
+      if (season == false) return msg.channel.send("Timed out");
+    }
     const progress = {};
     const epNames = {};
 
@@ -127,7 +132,11 @@ module.exports = {
       .addField("Season", showData.seasons[season - 1])
       .setColor("#f47521");
 
-    await progressMessage.edit(baseEmbed);
+    if (!progressMessage) {
+      progressMessage = await msg.channel.send(baseEmbed);
+    } else {
+      await progressMessage.edit(baseEmbed);
+    }
 
     async function updateProgress(embed, extra = false, error = false) {
       embed.setDescription(
@@ -164,14 +173,14 @@ module.exports = {
 
     const pty = require("node-pty");
     const downloader = pty.spawn(
-      "npx",
+      "node",
       [
-        "crunchyroll-dl",
+        "/home/sirhypernova/crunchydownbot/crunchyroll-dl/index.js",
         ...`-i ${crunchyBase}${show} -e ${episodes} --ignore-dubs -u ${
           login.username
         } -p ${login.password} ${
           unblocked ? "--unblocked" : ""
-        } -s soft --language enUS`.split(" "),
+        } --language enUS`.split(" "),
         "-o",
         '":ep - :epname"',
       ],
@@ -188,6 +197,7 @@ module.exports = {
     let error = false;
 
     downloader.on("data", (data) => {
+      process.stdout.write(data);
       let text = stripAnsi(data.toString());
       if (text.includes("◯") && !selectedSeason) {
         hasSeasons += text.split("◯").length - 1;
@@ -206,8 +216,8 @@ module.exports = {
       } else if (text.includes("Downloading episode as")) {
         let episodeName = /"(.*)"/
           .exec(text)[1]
-          .split(currentEpisode + " - ")[1]
-          .replace(".mp4", "");
+          .split(currentEpisode + " - ")[1];
+        episodeName = episodeName ? episodeName.replace(".mp4", "") : "UNKNOWN";
         epNames[currentEpisode] = episodeName;
       } else if (text.includes("Could not find")) {
         let badEpisodes = text.split(": ")[1].trim();
