@@ -141,7 +141,7 @@ module.exports = {
     async function updateProgress(embed, extra = false, error = false) {
       embed.setDescription(
         Object.entries(progress)
-          .map((ep, index) => {
+          .map((ep) => {
             return `${ep[0]} - ${epNames[ep[0]]}: **${ep[1]}%**`;
           })
           .join("\n")
