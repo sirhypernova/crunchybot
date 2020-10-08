@@ -211,14 +211,17 @@ module.exports = {
         progress[currentEpisode] = percent;
         if (percent.includes("100")) {
           progress[currentEpisode] = "100.00";
-          currentEpisode++;
         }
       } else if (text.includes("Downloading episode as")) {
-        let episodeName = /"(.*)"/
+        let episodeData = /"(.*)"/
           .exec(text)[1]
-          .split(currentEpisode + " - ")[1];
-        episodeName = episodeName ? episodeName.replace(".mp4", "") : "UNKNOWN";
-        epNames[currentEpisode] = episodeName;
+          .split(/([1-9]+[0-9]*) - /g)
+          .slice(1);
+        episodeName = episodeData
+          ? episodeData[1].replace(".mp4", "")
+          : "UNKNOWN";
+        currentEpisode = parseInt(episodeData[0]);
+        epNames[parseInt(episodeData[0])] = episodeName;
       } else if (text.includes("Could not find")) {
         let badEpisodes = text.split(": ")[1].trim();
         let firstBad = badEpisodes.includes(",")
@@ -232,6 +235,8 @@ module.exports = {
           showData.seasons[season - 1]
         }\``;
         cancelled = true;
+      } else if (text.includes("File already exists")) {
+        progress[currentEpisode] = "100.00";
       }
       if (text.includes("when creating an unblocked")) {
         error =
