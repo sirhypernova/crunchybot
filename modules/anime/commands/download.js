@@ -8,7 +8,7 @@ const crunchyBase = Utils.crunchyBase;
 
 module.exports = {
   checks: ["dj.owner"],
-  usage: "{prefix}download [unblocked] <episode[-episode]> <...show>",
+  usage: "{prefix}download [unblocked] [bypass] <episode[-episode]> <...show>",
   help: "Download Anime to your server",
   /**
    *
@@ -16,8 +16,13 @@ module.exports = {
    */
   async handler(msg, args, client) {
     let unblocked = false;
+    let bypass = false;
     if (args[0] == "true" || args[0] == "unblocked") {
       unblocked = true;
+      args.shift();
+    }
+    if (args[0] == "bypass") {
+      bypass = true;
       args.shift();
     }
     if (args.length < 2) return msg.channel.send("Invalid arguments");
@@ -38,8 +43,9 @@ module.exports = {
       )
       .slice(0, 4);
 
-    if (!searchedShows.length) return msg.channel.send("Show does not exist");
-    if (searchedShows.length > 1) {
+    if (!bypass && !searchedShows.length)
+      return msg.channel.send("Show does not exist");
+    if (!bypass && searchedShows.length > 1) {
       let selectShow = await msg.channel.send(
         new RichEmbed()
           .setTitle("Choose Show")
@@ -75,7 +81,7 @@ module.exports = {
         return msg.channel.send("The show you provided is invalid.");
       if (show == false) return msg.channel.send("Timed out");
       await selectShow.delete();
-    } else {
+    } else if (!bypass) {
       show = searchedShows[0].link;
     }
 
