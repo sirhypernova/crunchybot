@@ -55,7 +55,7 @@ if (rl.keyInYN("Plex Setup?")) {
       password: plexPassword,
     });
     plex.authenticator.on("token", async (token) => {
-      config.plex.token = "p7pMsuaXVu8s3GydGoLx";
+      config.plex.token = token;
       config.plex.enabled = true;
       fs.writeFileSync("config.json", JSON.stringify(config, null, "\t"));
       await selectPlexLibrary(new PlexAPI(config.plex));
